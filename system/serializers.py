@@ -1,4 +1,11 @@
 from rest_framework import serializers
+from .models import PerformanceReview
+
+class PerformanceReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PerformanceReview
+        fields = ['id', 'employee', 'review_date', 'feedback', 'review_stage']
+from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from .models import Company, Department, Employee, Project, UserAccount
 from django.contrib.auth import authenticate

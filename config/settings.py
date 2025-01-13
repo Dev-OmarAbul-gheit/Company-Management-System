@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_fsm_log',
     'djoser',
     'rest_framework_simplejwt',
     'system',
