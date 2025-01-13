@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django_fsm import FSMField, transition
 from uuid import uuid4
 
 
@@ -92,3 +93,45 @@ class Project(models.Model):
     
     def __str__(self) -> str:
         return self.name
+
+
+class PerformanceReview(models.Model):
+    STAGE_CHOICES = [
+        ('pending_review', 'Pending Review'),
+        ('review_scheduled', 'Review Scheduled'),
+        ('feedback_provided', 'Feedback Provided'),
+        ('under_approval', 'Under Approval'),
+        ('review_approved', 'Review Approved'),
+        ('review_rejected', 'Review Rejected'),
+        ]
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='performance_reviews')
+    review_date = models.DateField(null = True, blank=True)
+    feedback = models.TextField(blank=True, null=True)
+    review_stage = FSMField(default='pending_review', choices=STAGE_CHOICES)
+
+    @transition(field=review_stage, source='pending_review', target='review_scheduled')
+    def schedule_review(self):
+        pass  # Add logic for scheduling a review if necessary
+
+    @transition(field=review_stage, source='review_scheduled', target='feedback_provided')
+    def provide_feedback(self, feedback):
+        self.feedback = feedback
+
+    @transition(field=review_stage, source='feedback_provided', target='under_approval')
+    def submit_for_approval(self):
+        pass  # Additional logic for manager notifications can be added here
+
+    @transition(field=review_stage, source='under_approval', target='review_approved')
+    def approve_review(self):
+        pass  # Logic for approving a review
+
+    @transition(field=review_stage, source='under_approval', target='review_rejected')
+    def reject_review(self):
+        pass  # Logic for rejecting a review
+
+    @transition(field=review_stage, source='review_rejected', target='feedback_provided')
+    def resubmit_feedback(self, feedback):
+        self.feedback = feedback
+
+    def __str__(self) -> str:
+        return f"Performance Review for {self.employee.name} ({self.review_stage})"

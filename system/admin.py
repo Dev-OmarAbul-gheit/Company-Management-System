@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django_fsm_log.admin import StateLogInline
+from .models import UserAccount, Company, Department, Employee, Project, PerformanceReview
 
 
 admin.site.site_header: str = 'Company Management System'
 admin.site.index_title = 'Admin'
 
-from .models import UserAccount, Company, Department, Employee, Project
 
 @admin.register(UserAccount)
 class UserAccountAdmin(UserAdmin):
@@ -62,3 +63,10 @@ class ProjectAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related('employees')
+
+
+@admin.register(PerformanceReview)
+class PerformanceReviewAdmin(admin.ModelAdmin):
+    list_display = ('employee', 'review_stage', 'review_date')
+    list_select_related = ['employee']
+    inlines = [StateLogInline]
