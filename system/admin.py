@@ -2,14 +2,14 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 
-admin.site.site_header: str = 'Company Management System'
+admin.site.site_header = 'Company Management System'
 admin.site.index_title = 'Admin'
 
 from .models import UserAccount, Company, Department, Employee, Project
 
 @admin.register(UserAccount)
 class UserAccountAdmin(UserAdmin):
-    list_display = ['id', 'username', 'email', 'role']
+    list_display = ['id', 'username', 'email', 'role', 'employee']
     search_fields = ['username', 'email']
 
     fieldsets = (

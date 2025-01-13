@@ -1,12 +1,43 @@
 from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
-from .models import Company, Department, Employee, Project
+from .models import Company, Department, Employee, Project, UserAccount
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
-class UserCreateSerializer(BaseUserCreateSerializer):
-    id = serializers.UUIDField(read_only=True)
+class UserRegisterSerializer(BaseUserCreateSerializer):
+    username = serializers.CharField(max_length = 20, write_only = True)
+    password = serializers.CharField(max_length = 50)
     class Meta(BaseUserCreateSerializer.Meta):
-        fields = ['id', 'username', 'email', 'password']
+        fields = ['username', 'email', 'password']
+
+
+class UserToken(serializers.Serializer):
+    refersh_token = serializers.CharField(read_only=True)
+    access_token = serializers.CharField(read_only=True)
+    user_type = serializers.CharField(read_only=True)
+
+    def create_user_token(self, user):
+        refersh_token = RefreshToken.for_user(user)
+        access_token = refersh_token.access_token
+        return {
+            "refersh_token": str(refersh_token),
+            "access_token": str(access_token),
+            "user_type": user.role,
+        }
+
+
+class UserLoginSerializer(UserToken, serializers.Serializer):
+    email = serializers.EmailField(write_only=True)
+    password = serializers.CharField(write_only=True)
+
+    def create(self, validated_data):
+        email = validated_data["email"]
+        password = validated_data["password"]
+        if user := authenticate(email=email, password=password):
+            return self.create_user_token(user)
+        raise serializers.ValidationError("email or password wrong")
 
 
 class CompanySerializer(serializers.ModelSerializer):

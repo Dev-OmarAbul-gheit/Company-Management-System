@@ -16,6 +16,9 @@ class UserAccount(AbstractUser):
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=EMPLOYEE_ROLE)
     
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'password']
+
     def __str__(self) -> str:
         return self.username
     
@@ -68,6 +71,7 @@ class Employee(models.Model):
     hired_on = models.DateField(null=True, blank=True)
     department = models.ForeignKey(Department, related_name='employees', on_delete=models.CASCADE)
     company = models.ForeignKey(Company, related_name='employees' , on_delete=models.CASCADE)
+    account = models.OneToOneField(UserAccount, on_delete= models.SET_NULL, null= True, blank=True)
 
     def __str__(self) -> str:
         return self.name
