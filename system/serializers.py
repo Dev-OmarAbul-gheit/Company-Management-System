@@ -1,5 +1,12 @@
 from rest_framework import serializers
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from .models import Company, Department, Employee, Project
+
+
+class UserCreateSerializer(BaseUserCreateSerializer):
+    id = serializers.UUIDField(read_only=True)
+    class Meta(BaseUserCreateSerializer.Meta):
+        fields = ['id', 'username', 'email', 'password']
 
 
 class CompanySerializer(serializers.ModelSerializer):
